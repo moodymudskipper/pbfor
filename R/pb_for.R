@@ -49,22 +49,63 @@ pb_for <-
            show_after = .2,
            force = FALSE,
            once = TRUE) {
-    f <- function(it, seq, expr){
+    f <- function(`*it*`, `*seq*`, `*expr*`){
       `*pb*` <- progress::progress_bar$new(
         format = format, width = width, complete = complete,
         incomplete = incomplete, current = current,
         callback = rlang::as_function(callback),
         clear = clear, show_after = show_after, force = force,
-        total = length(seq))
+        total = length(`*seq*`))
+      on.exit({
+        vars <- setdiff(ls(), c("*pb*", "*expr*", "*it*", "*seq*"))
+        list2env(mget(vars),envir = parent.frame())
+        if(once) rm(`for`,envir = parent.frame())
+      })
       eval(substitute(
-        env = list(it = substitute(it), seq = substitute(seq), expr = substitute(expr)),
-        base::`for`(it, seq,{
-          expr
+        env = list(IT = substitute(`*it*`), SEQ = substitute(`*seq*`), EXPR = substitute(`*expr*`)),
+        base::`for`(IT, SEQ,{
+          EXPR
           `*pb*`$tick()
         })))
-      if(once) rm(`for`,envir = parent.frame())
     }
     assign("for", value = f,envir = parent.frame())
   }
 
+
+
+
+#
+# pb <- function(format = "[:bar] :percent",
+#                width = options("width")[[1]] - 2,
+#                complete = "=",
+#                incomplete = "-",
+#                current =">",
+#                callback = invisible,
+#                clear = TRUE,
+#                show_after = .2,
+#                force = FALSE){
+#   structure(list(format = format, width = width, complete = complete,
+#                  incomplete = incomplete, current = current,
+#                  callback = rlang::as_function(callback),
+#                  clear = clear, show_after = show_after, force = force),
+#             class = "forpb_input")
+# }
+#
+#
+# `for<-` <- function(it, seq, expr, value) UseMethod("for<-")
+#
+# `for<-.forpb_input` <-
+#   function(it, seq, expr, value){
+#     value$total <- length(seq)
+#     `*pb*` <-  do.call(progress::progress_bar$new, value)
+#       eval(substitute(
+#         env = list(it = substitute(it), seq = substitute(seq), expr = substitute(expr)),
+#         base::`for`(it, seq,{
+#           expr
+#           `*pb*`$tick()
+#         })))
+#       if(once) rm(`for`,envir = parent.frame())
+#     }
+#     assign("for", value = f,envir = parent.frame())
+#   }
 
