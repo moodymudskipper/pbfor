@@ -6,13 +6,15 @@ Authors@R:
            family = "Fabri",
            role = c("aut", "cre"),
            email = "antoine.fabri@gmail.com")
-Description: 'pbfor' wraps all the features of the package
-    'progress'. After the user calls `pb_for(...)`, a regular for loop
-    will show a progress bar
+Description: 'pbfor' wraps all the features of the package 'progress'. After the user calls `pb_for(...)`, a regular for loop will show a progress bar.
 License: GPL-3
 Encoding: UTF-8
 LazyData: true
 Imports: 
     progress,
-    rlang
+    rlang,
+    pryr
 RoxygenNote: 6.1.1
+Suggests: 
+    testthat
+Roxygen: list(markdown = TRUE)

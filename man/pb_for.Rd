@@ -11,7 +11,7 @@ pb_for(format = "[:bar] :percent", width = options("width")[[1]] - 2,
 }
 \arguments{
 \item{format}{The format of the progress bar. A number of tokens can be used
-here, see them below. It defaults to "[:bar] :percent", which means that
+here, see them below. It defaults to "\link{:bar} :percent", which means that
 the progress bar is within brackets on the left, and the percentage is
 printed on the right.}
 
@@ -34,26 +34,24 @@ showing it at all.}
 
 \item{force}{Whether to force showing the progress bar, even if the given (or default) stream does not seem to support it.}
 
-\item{once}{Wether to return `for` to it's default behavior after it's been
+\item{once}{Wether to return \code{for} to it's default behavior after it's been
 called once.}
 }
 \description{
-A wrapper around the package *progress* to be able to use progress bar with
-regular `for` loops conveniently. It forwards all its parameters to
-`progress::progress_bar$new()` except for `once`.
+A wrapper around the package \emph{progress} to be able to use progress bar with
+regular \code{for} loops conveniently. It forwards all its parameters to
+\code{progress::progress_bar$new()} except for \code{once}.
 }
 \examples{
- \dontrun{
-  pb_for()
-  for (i in 1:10) {
-    # DO SOMETHING
-    Sys.sleep(0.5)
-  }
+pb_for()
+for (i in 1:10) {
+  # DO SOMETHING
+  Sys.sleep(0.5)
+}
 
-  pb_for(format = "Working hard: [:bar] :percent :elapsed", callback = ~message("Were'd done!"))
-  for (i in 1:10) {
-    # DO SOMETHING
-    Sys.sleep(0.5)
-  }
+pb_for(format = "Working hard: [:bar] :percent :elapsed", callback = ~message("Were'd done!"))
+for (i in 1:10) {
+  # DO SOMETHING
+  Sys.sleep(0.5)
 }
 }
