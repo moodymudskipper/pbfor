@@ -60,7 +60,7 @@ Using parameters from `progress::progress_bar$new()` :
 
 ```{r}
 pb_for(format = "Working hard: [:bar] :percent :elapsed", 
-       callback = function(x) ("Were'd done!"))
+       callback = function(x) message("Were'd done!"))
 for (i in 1:10) {
   # DO SOMETHING
   Sys.sleep(0.5)
