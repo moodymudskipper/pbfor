@@ -19,6 +19,9 @@
 #'   shown on the screen. For very short processes, it is probably not worth
 #'   showing it at all.
 #' @param force Whether to force showing the progress bar, even if the given (or default) stream does not seem to support it.
+#' @param tokens A list of unevaluated expressions, using `alist`, to be passed
+#'   passed to the `tick` method of the progress bar
+#' @param message A message to display on top of the bar
 #' @param once Wether to return `for` to it's default behavior after it's been
 #'   called once.
 #'
@@ -53,12 +56,14 @@ pb_for <-
     force = FALSE,
     # The only arg not forwarded to progress::progress_bar$new()
     # By default `for` will self detruct after being called
+    message = NULL,
+    tokens = alist(),
     once = TRUE) {
 
     # create the function that will replace `for`
     f <- function(it, seq, expr){
       # to avoid notes at CMD check
-      `*pb*` <- IT <- SEQ <- EXPR <- NULL
+      PB <- IT <- SEQ <- EXPR <- TOKENS <- NULL
 
       # forward all arguments to progress::progress_bar$new() and add
       # a `total` argument compted from `seq` argument
@@ -68,14 +73,14 @@ pb_for <-
         callback = callback,
         clear = clear, show_after = show_after, force = force,
         total = length(seq))
+      if(!is.null(message)) pb$message(message)
 
       # using on.exit allows us to self destruct `for` if relevant even if
       # the call fails.
       # It also allows us to send to the local environment the changed/created
       # variables in their last state, even if the call fails (like standard for)
       on.exit({
-        vars <- setdiff(ls(env), c("*pb*"))
-        list2env(mget(vars,envir = env), envir = parent.frame())
+        list2env(mget(ls(env),envir = env), envir = parent.frame())
         if(once) rm(`for`,envir = parent.frame())
       })
 
@@ -84,12 +89,14 @@ pb_for <-
       # it is executed in a dedicated environment and the progress bar is given
       # a name unlikely to conflict
       env <- new.env(parent = parent.frame())
-      env$`*pb*` <-  pb
       eval(substitute(
-        env = list(IT = substitute(it), SEQ = substitute(seq), EXPR = substitute(expr)),
+        env = list(IT = substitute(it), SEQ = substitute(seq),
+                   EXPR = do.call(substitute, list(substitute(expr),list(message = pb$message))),
+                   TOKENS = tokens, PB = pb
+        ),
         base::`for`(IT, SEQ,{
           EXPR
-          `*pb*`$tick()
+          PB$tick()
         })), envir = env)
     }
     # override `for` in the parent frame
@@ -113,7 +120,7 @@ pb_for <-
 `for<-` <-
   function(it, seq, expr, value){
     # to avoid notes at CMD check
-    `*pb*` <- IT <- SEQ <- EXPR <- NULL
+    PB <- IT <- SEQ <- EXPR <- NULL
     # the symbol fed to `it` is unknown, R uses `*tmp*` for assignment functions
     # so we go get it by inspecting the memory addresses
     it_chr <- fetch_name(it)
@@ -136,12 +143,13 @@ pb_for <-
     # with it, seq, expr, value, we need the progress bar so we name it `*pb*`
     # unlikely to conflict by accident
     env <- new.env(parent = parent.frame())
-    env$`*pb*` <-  pb
     eval(substitute(
-      env =  list(IT = it_sym, SEQ = substitute(seq), EXPR = substitute(expr)),
+      env =  list(IT = it_sym, SEQ = substitute(seq),
+                  EXPR = do.call(substitute, list(substitute(expr),list(message = pb$message))),
+                  PB = pb),
       base::`for`(IT, SEQ,{
         EXPR
-        `*pb*`$tick()
+        PB$tick()
       })), envir = env)
 
     # because of the `fun<-` syntax we need to return the modified first argument

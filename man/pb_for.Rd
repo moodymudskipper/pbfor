@@ -7,7 +7,7 @@
 pb_for(format = "[:bar] :percent", width = options("width")[[1]] - 2,
   complete = "=", incomplete = "-", current = ">",
   callback = invisible, clear = TRUE, show_after = 0.2,
-  force = FALSE, once = TRUE)
+  force = FALSE, message = NULL, tokens = alist(), once = TRUE)
 }
 \arguments{
 \item{format}{The format of the progress bar. A number of tokens can be used
@@ -34,6 +34,11 @@ showing it at all.}
 
 \item{force}{Whether to force showing the progress bar, even if the given (or default) stream does not seem to support it.}
 
+\item{message}{A message to display on top of the bar}
+
+\item{tokens}{A list of unevaluated expressions, using \code{alist}, to be passed
+passed to the \code{tick} method of the progress bar}
+
 \item{once}{Wether to return \code{for} to it's default behavior after it's been
 called once.}
 }
@@ -49,7 +54,8 @@ for (i in 1:10) {
   Sys.sleep(0.5)
 }
 
-pb_for(format = "Working hard: [:bar] :percent :elapsed", callback = ~message("Were'd done!"))
+pb_for(format = "Working hard: [:bar] :percent :elapsed",
+       callback = function(x) message("Were'd done!"))
 for (i in 1:10) {
   # DO SOMETHING
   Sys.sleep(0.5)
